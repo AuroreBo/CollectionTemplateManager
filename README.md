@@ -1,2 +1,2 @@
 # CollectionTemplateManager
-Tool for manage your collection
+Tool tomanage your collection
