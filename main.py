@@ -12,7 +12,7 @@ import urllib
 from PyQt6.QtWidgets import QApplication, QWidget, QTabWidget
 
 from PyQt6 import QtCore
-
+from template_manager import TemplateManager
 
 # __________________________________________________
 # Variables.
@@ -27,14 +27,11 @@ def main() -> None:
     app = QApplication([])
     app_name = "Template Manager"
 
-
-    window = QWidget()
-    window.setWindowTitle(app_name)
+    window = TemplateManager(app_name)
     window.resize(window_width, window_height)
 
     window.show()
     app.exec()
-
 
 if __name__ == "__main__":
     main()
