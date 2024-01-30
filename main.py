@@ -28,7 +28,6 @@ def main() -> None:
     app_name = "Template Manager"
 
     window = TemplateManager(app_name)
-    window.resize(window_width, window_height)
 
     window.show()
     app.exec()

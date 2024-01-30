@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from form import Ui_Form
+from form import Ui_global_form
 from template import Template
 
 
@@ -21,7 +21,7 @@ class TemplateManager(QMainWindow):
         # self.move(0, 0)
         self.app_name = name
 
-        self.ui = Ui_Form()
+        self.ui = Ui_global_form()
         self.ui.setupUi(self)
 
         self.template: Template = None
@@ -32,16 +32,17 @@ class TemplateManager(QMainWindow):
         filter = "*.png *.jpg"
         img= QFileDialog.getOpenFileName(self, "Select Template", ".", filter)
 
-        # Update UI
-        self.ui.template_path.setText(img[0])
+        if img is not None:
+            # Update UI
+            self.ui.template_path.setText(img[0])
 
-        self.template = Template(img[0], self.ui.img_widget)
+            self.template = Template(img[0], self.ui.img_widget)
 
-        print(self.template.width, self.template.height + 100)
-
-        # self.ui.resize(self.template.width, self.template.height + 100)
-        # self.ui.img_widget.setStyleSheet("background-image: url("+ img[0] +")")
-        # self.ui.img_widget.setStyleSheet("QWidget {background-image: url("+ self.template +") }")
+            self.resize(self.template.width+20, self.height()+100)
+            self.ui.scrollArea.setWidgetResizable(True)
+            self.ui.scrollArea.resize(self.template.width, self.height())
+            # self.ui.img_widget.setStyleSheet("background-image: url("+ img[0] +")")
+            # self.ui.img_widget.setStyleSheet("QWidget {background-image: url("+ self.template +") }")
 
 
 
