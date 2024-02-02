@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
 
 class Template(QWidget):
     """ Template widget class"""
-    def __init__(self, path: str, ui: QWidget, window :QMainWindow) -> None:
+    def __init__(self, path: str, ui: QWidget, window: QMainWindow) -> None:
         super().__init__()  # Call the inherited classes __init__ method
 
         self.path = path
@@ -54,7 +54,18 @@ class Template(QWidget):
             if write_status:
                 self.ui.setStyleSheet("background-image: url(" + self.path + ")")
 
+    # https://www.tutorialspoint.com/how-to-detect-a-rectangle-and-square-in-an-image-using-opencv-python
+    def detect_pc(self):
+        img = cv2.imread(self.path)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        edged = cv2.Canny(gray, 1, 100)
+
+        cv2.imshow("edge", edged)
+
+
     # https://stackoverflow.com/questions/44650888/resize-an-image-without-distortion-opencv
+    # https://dontrepeatyourself.org/post/edge-and-contour-detection-with-opencv-and-python/
     def image_resize(self, image, width=None, height=None, inter=cv2.INTER_AREA):
         # initialize the dimensions of the image to be resized and
         # grab the image size

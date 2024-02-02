@@ -31,7 +31,6 @@ class TemplateManager(QMainWindow):
 
         self.ui.select_template_button.clicked.connect(self.select_template)
 
-
     def select_template(self):
         filter = "*.png *.jpg"
         img = QFileDialog.getOpenFileName(self, "Select Template", ".", filter)
@@ -42,13 +41,14 @@ class TemplateManager(QMainWindow):
 
             self.template = Template(img[0], self.ui.img_widget, self)
 
-            marge = int(GetSystemMetrics(1) * 0.4)
+            marge = int(GetSystemMetrics(1) * 0.2)
             self.resize(self.template.width+20, GetSystemMetrics(1)-marge)
-            self.move(0,0)
+            self.move(50,50)
             self.ui.scrollArea.setWidgetResizable(True)
             self.ui.scrollArea.resize(self.template.width, self.height())
 
             self.ui.resize_button.clicked.connect(self.template.save_resized_image)
+            self.ui.detect_button.clicked.connect(self.template.detect_pc)
 
     def resizeEvent(self, event):
         QMainWindow.resizeEvent(self, event)
