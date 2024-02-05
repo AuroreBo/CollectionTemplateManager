@@ -1,6 +1,7 @@
 import cv2
 import os
 from pathlib import Path
+import numpy as np
 
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtWidgets import (
@@ -21,6 +22,11 @@ class Template(QWidget):
 
         self.window = window
         self.ui = ui
+        self.debug_detection_contour: bool = False
+        self.window.ui.debug_checkBox.stateChanged.connect(self.update_debug_button)
+        self.window.ui.resize_button.clicked.connect(self.save_resized_image)
+        self.window.ui.detect_button.clicked.connect(self.detect_pc)
+        self.window.ui.debug_checkBox.stateChanged.connect(self.update_debug_button)
 
         self.img = cv2.imread(self.path)
         self.height, self.width, _ = self.img.shape
@@ -54,18 +60,76 @@ class Template(QWidget):
             if write_status:
                 self.ui.setStyleSheet("background-image: url(" + self.path + ")")
 
-    # https://www.tutorialspoint.com/how-to-detect-a-rectangle-and-square-in-an-image-using-opencv-python
+    # https://dontrepeatyourself.org/post/edge-and-contour-detection-with-opencv-and-python/
     def detect_pc(self):
         img = cv2.imread(self.path)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gamma = 0.2  # change the value here to get different result
+        adjusted = self.adjust_gamma(gray, gamma=gamma)
+        blurred = cv2.GaussianBlur(adjusted, (3, 3), 0)
+        edged = cv2.Canny(blurred, 10, 100)
 
-        edged = cv2.Canny(gray, 1, 100)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
 
-        cv2.imshow("edge", edged)
+        dilate = cv2.dilate(edged, kernel, iterations=1)
+        contours, _ = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+        if self.debug_detection_contour:
+            image_copy = img.copy()
+            # draw the contours on a copy of the original image
+            cv2.drawContours(image_copy, contours, -1, (0, 255, 0), 2)
+            print(len(contours), "objects were found in this image.")
+
+            cv2.imshow("Adjusted", adjusted)
+            cv2.imshow("Edged", edged)
+            # cv2.imshow("Dilated image", dilate)
+            cv2.imshow("contours", image_copy)
+
+        font = cv2.FONT_HERSHEY_COMPLEX
+        image_copy = img.copy()
+        for cnt in contours:
+            approx = cv2.approxPolyDP(cnt, 0.009 * cv2.arcLength(cnt, True), True)
+
+            # cv2.drawContours(dilate, contours, -1, (0, 0, 255), 5)
+            cv2.drawContours(image_copy, [approx], -1, (0, 0, 255), 5)
+
+            # Used to flatted the array containing
+            # the co-ordinates of the vertices.
+            n = approx.ravel()
+            i = 0
+
+            for j in n:
+                if (i % 2 == 0):
+                    x = n[i]
+                    y = n[i + 1]
+
+                    # String containing the co-ordinates.
+                    string = str(x) + " " + str(y)
+
+                    if (i == 0):
+                        # text on topmost co-ordinate.
+                        cv2.putText(dilate, "Arrow tip", (x, y), font, 0.5, (255, 0, 0))
+                    else:
+                        # text on remaining co-ordinates.
+                        cv2.putText(dilate, string, (x, y),font, 0.5, (0, 255, 0))
+                i = i + 1
+
+
+        cv2.imshow('copy', image_copy)
+
+    # https://stackoverflow.com/questions/33322488/how-to-change-image-illumination-in-opencv-python
+    def adjust_gamma(self, image, gamma=1.0):
+
+        invGamma = 1.0 / gamma
+        table = np.array([((i / 255.0) ** invGamma) * 255
+                          for i in np.arange(0, 256)]).astype("uint8")
+
+        return cv2.LUT(image, table)
+
+    def update_debug_button(self) -> None:
+        self.debug_detection_contour = self.window.ui.debug_checkBox.isChecked()
 
     # https://stackoverflow.com/questions/44650888/resize-an-image-without-distortion-opencv
-    # https://dontrepeatyourself.org/post/edge-and-contour-detection-with-opencv-and-python/
     def image_resize(self, image, width=None, height=None, inter=cv2.INTER_AREA):
         # initialize the dimensions of the image to be resized and
         # grab the image size

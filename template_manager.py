@@ -47,9 +47,6 @@ class TemplateManager(QMainWindow):
             self.ui.scrollArea.setWidgetResizable(True)
             self.ui.scrollArea.resize(self.template.width, self.height())
 
-            self.ui.resize_button.clicked.connect(self.template.save_resized_image)
-            self.ui.detect_button.clicked.connect(self.template.detect_pc)
-
     def resizeEvent(self, event):
         QMainWindow.resizeEvent(self, event)
         self.ui.scrollArea.resize(self.width()-10, self.height())
