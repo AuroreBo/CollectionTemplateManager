@@ -6,12 +6,14 @@ import numpy as np
 from photocard import Photocard
 
 from PyQt6 import QtCore, QtGui
+from PyQt6.QtGui import QPixmap, QImageReader
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
     QFileDialog,
     QGroupBox,
     QMenu,
+    QLabel,
     QWidget,
 )
 
@@ -38,7 +40,12 @@ class Template(QWidget):
         self.ui.setMinimumSize(self.width-20, self.height)
         self.ui.setMaximumWidth(self.width)
 
-        self.ui.setStyleSheet("background-image: url(" + self.path + ")")
+        label = QLabel(self.ui)
+        pixmap = QPixmap(self.path)
+        print(f" pixmap size = {pixmap.width()},{pixmap.height()}")
+        label.setPixmap(pixmap)
+        # label.resize(self.width, self.height)
+        # self.ui.setStyleSheet("background-image: url(" + self.path + ")")
 
         self.clear_pc_widget()
 
