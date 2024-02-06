@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 import numpy as np
 
+from photocard import Photocard
+
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtWidgets import (
     QApplication,
@@ -23,6 +25,8 @@ class Template(QWidget):
         self.window = window
         self.ui = ui
         self.debug_detection_contour: bool = False
+        self.photocards: [Photocard] = []
+
         self.window.ui.debug_checkBox.stateChanged.connect(self.update_debug_button)
         self.window.ui.resize_button.clicked.connect(self.save_resized_image)
         self.window.ui.detect_button.clicked.connect(self.detect_pc)
@@ -35,6 +39,8 @@ class Template(QWidget):
         self.ui.setMaximumWidth(self.width)
 
         self.ui.setStyleSheet("background-image: url(" + self.path + ")")
+
+        self.clear_pc_widget()
 
     def save_resized_image(self):
         folder_path = Path(self.path).parent.absolute()
@@ -62,6 +68,7 @@ class Template(QWidget):
 
     # https://dontrepeatyourself.org/post/edge-and-contour-detection-with-opencv-and-python/
     def detect_pc(self):
+        self.clear_pc_widget()
         img = cv2.imread(self.path)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gamma = 0.2  # change the value here to get different result
@@ -74,48 +81,50 @@ class Template(QWidget):
         dilate = cv2.dilate(edged, kernel, iterations=1)
         contours, _ = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+        image_copy = img.copy()
+        image_pc = img.copy()
+        for cnt in contours:
+            approx = cv2.approxPolyDP(cnt, 0.009 * cv2.arcLength(cnt, True), True)
+
+            cv2.drawContours(image_copy, [approx], -1, (0, 0, 255), 5)
+
+            x, y, w, h = cv2.boundingRect(cnt)
+            # to clean with average pc width and height
+            if w > 70 and w < 85:
+                if h > 105 and h < 135:
+                    cv2.rectangle(image_pc, (x, y), (x + w, y + h), (36, 255, 12), 8)
+
+                    self.add_pc_widget((x,y),(w,h))
+
+            if self.debug_detection_contour:
+                cv2.putText(image_pc, str(w), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
+                cv2.putText(image_pc, str(h), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 255), 2)
+
         if self.debug_detection_contour:
-            image_copy = img.copy()
+            image_contours = img.copy()
             # draw the contours on a copy of the original image
             cv2.drawContours(image_copy, contours, -1, (0, 255, 0), 2)
             print(len(contours), "objects were found in this image.")
 
-            cv2.imshow("Adjusted", adjusted)
-            cv2.imshow("Edged", edged)
+            # cv2.imshow("Adjusted", adjusted)
+            # cv2.imshow("Edged", edged)
             # cv2.imshow("Dilated image", dilate)
-            cv2.imshow("contours", image_copy)
+            cv2.imshow("contours", image_contours)
 
-        font = cv2.FONT_HERSHEY_COMPLEX
-        image_copy = img.copy()
-        for cnt in contours:
-            approx = cv2.approxPolyDP(cnt, 0.009 * cv2.arcLength(cnt, True), True)
+            cv2.imshow('copy', image_copy)
+            cv2.imshow('pc', image_pc)
+        print(self.photocards)
+        print(len(self.photocards))
 
-            # cv2.drawContours(dilate, contours, -1, (0, 0, 255), 5)
-            cv2.drawContours(image_copy, [approx], -1, (0, 0, 255), 5)
+    def add_pc_widget(self, position: tuple, size: tuple):
+        pc = Photocard(position, size, self.ui)
+        self.photocards.append(pc)
 
-            # Used to flatted the array containing
-            # the co-ordinates of the vertices.
-            n = approx.ravel()
-            i = 0
+    def clear_pc_widget(self):
+        for child in self.ui.children():
+            child.deleteLater()
 
-            for j in n:
-                if (i % 2 == 0):
-                    x = n[i]
-                    y = n[i + 1]
-
-                    # String containing the co-ordinates.
-                    string = str(x) + " " + str(y)
-
-                    if (i == 0):
-                        # text on topmost co-ordinate.
-                        cv2.putText(dilate, "Arrow tip", (x, y), font, 0.5, (255, 0, 0))
-                    else:
-                        # text on remaining co-ordinates.
-                        cv2.putText(dilate, string, (x, y),font, 0.5, (0, 255, 0))
-                i = i + 1
-
-
-        cv2.imshow('copy', image_copy)
+        self.photocards.clear()
 
     # https://stackoverflow.com/questions/33322488/how-to-change-image-illumination-in-opencv-python
     def adjust_gamma(self, image, gamma=1.0):
