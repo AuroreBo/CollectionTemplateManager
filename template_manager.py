@@ -39,13 +39,13 @@ class TemplateManager(QMainWindow):
             # Update UI
             self.ui.template_path.setText(img[0])
 
-            self.template = Template(img[0], self.ui.img_widget, self)
+            self.template = Template(img[0], self)
 
             marge = int(GetSystemMetrics(1) * 0.2)
             self.resize(self.template.width+20, GetSystemMetrics(1)-marge)
             self.move(50,50)
-            self.ui.scrollArea.setWidgetResizable(True)
-            self.ui.scrollArea.resize(self.template.width, self.height())
+            # self.ui.scrollArea.setWidgetResizable(True)
+            # self.ui.scrollArea.resize(self.template.width, self.height())
 
     def resizeEvent(self, event):
         QMainWindow.resizeEvent(self, event)

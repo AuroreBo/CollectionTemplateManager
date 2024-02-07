@@ -30,8 +30,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>556</width>
-      <height>1045</height>
+      <width>552</width>
+      <height>1052</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout_2">
@@ -165,6 +165,22 @@
            <height>1000</height>
           </size>
          </property>
+         <widget class="QLabel" name="template_label">
+          <property name="geometry">
+           <rect>
+            <x>-4</x>
+            <y>2</y>
+            <width>551</width>
+            <height>491</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>ALLOOOOOOOOOO</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>

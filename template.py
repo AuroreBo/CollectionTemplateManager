@@ -19,13 +19,13 @@ from PyQt6.QtWidgets import (
 
 class Template(QWidget):
     """ Template widget class"""
-    def __init__(self, path: str, ui: QWidget, window: QMainWindow) -> None:
+    def __init__(self, path: str, window: QMainWindow) -> None:
         super().__init__()  # Call the inherited classes __init__ method
 
         self.path = path
 
         self.window = window
-        self.ui = ui
+        self.ui = self.window.ui.img_widget
         self.debug_detection_contour: bool = False
         self.photocards: [Photocard] = []
 
@@ -40,12 +40,22 @@ class Template(QWidget):
         self.ui.setMinimumSize(self.width-20, self.height)
         self.ui.setMaximumWidth(self.width)
 
-        label = QLabel(self.ui)
-        pixmap = QPixmap(self.path)
-        print(f" pixmap size = {pixmap.width()},{pixmap.height()}")
-        label.setPixmap(pixmap)
-        # label.resize(self.width, self.height)
-        # self.ui.setStyleSheet("background-image: url(" + self.path + ")")
+        self.ui.setStyleSheet("QWidget#img_widget{background-image: url(" + self.path + "); border:0px}")
+
+
+        # ----------------------------------------------------------------------------------
+        # Attempt to clean my stylesheet for parent widget but my pixmap is not showing up
+        # ----------------------------------------------------------------------------------
+
+        # pixmap = QPixmap()
+        # pixmap.loadFromData(self.img)
+        # # print(f" pixmap size = {pixmap.width()},{pixmap.height()}")
+        # self.window.ui.template_label.setPixmap(pixmap)
+        #
+        # self.window.ui.template_label.setText("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+        # self.window.ui.template_label.setStylesheet("background-color:green;")
+        # self.window.ui.template_label.resize(self.width, self.height)
+        # ----------------------------------------------------------------------------------
 
         self.clear_pc_widget()
 
@@ -67,11 +77,11 @@ class Template(QWidget):
         self.path = path
 
         if os.path.exists(file_path):
-            self.ui.setStyleSheet("background-image: url(" + self.path + ")")
+            self.ui.setStyleSheet("QWidget#img_widget{background-image: url(" + self.path + "); border:0px}")
         else:
             write_status = cv2.imwrite(file_path,self.img)
             if write_status:
-                self.ui.setStyleSheet("background-image: url(" + self.path + ")")
+                self.ui.setStyleSheet("QWidget#img_widget{background-image: url(" + self.path + "); border:0px}")
 
     # https://dontrepeatyourself.org/post/edge-and-contour-detection-with-opencv-and-python/
     def detect_pc(self):
