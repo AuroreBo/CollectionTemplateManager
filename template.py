@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import numpy as np
 
-from photocard import Photocard
+from photocard import Photocard, PhotocardState
 
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtGui import QPixmap, QImageReader
@@ -28,11 +28,15 @@ class Template(QWidget):
         self.ui = self.window.ui.img_widget
         self.debug_detection_contour: bool = False
         self.photocards: [Photocard] = []
+        self.mode: PhotocardState = PhotocardState.OWNED
+        self.window.ui.mode_comboBox.setCurrentText("Owned")
 
         self.window.ui.debug_checkBox.stateChanged.connect(self.update_debug_button)
         self.window.ui.resize_button.clicked.connect(self.save_resized_image)
         self.window.ui.detect_button.clicked.connect(self.detect_pc)
+        self.window.ui.export_button.clicked.connect(self.export_template)
         self.window.ui.debug_checkBox.stateChanged.connect(self.update_debug_button)
+        self.window.ui.mode_comboBox.currentTextChanged.connect(self.update_mode)
 
         self.img = cv2.imread(self.path)
         self.height, self.width, _ = self.img.shape
@@ -42,22 +46,7 @@ class Template(QWidget):
 
         self.ui.setStyleSheet("QWidget#img_widget{background-image: url(" + self.path + "); border:0px}")
 
-
-        # ----------------------------------------------------------------------------------
-        # Attempt to clean my stylesheet for parent widget but my pixmap is not showing up
-        # ----------------------------------------------------------------------------------
-
-        # pixmap = QPixmap()
-        # pixmap.loadFromData(self.img)
-        # # print(f" pixmap size = {pixmap.width()},{pixmap.height()}")
-        # self.window.ui.template_label.setPixmap(pixmap)
-        #
-        # self.window.ui.template_label.setText("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-        # self.window.ui.template_label.setStylesheet("background-color:green;")
-        # self.window.ui.template_label.resize(self.width, self.height)
-        # ----------------------------------------------------------------------------------
-
-        self.clear_pc_widget()
+        self.detect_pc()
 
     def save_resized_image(self):
         folder_path = Path(self.path).parent.absolute()
@@ -134,7 +123,7 @@ class Template(QWidget):
         print(len(self.photocards))
 
     def add_pc_widget(self, position: tuple, size: tuple):
-        pc = Photocard(position, size, self.ui)
+        pc = Photocard(position, size, self)
         self.photocards.append(pc)
 
     def clear_pc_widget(self):
@@ -142,6 +131,28 @@ class Template(QWidget):
             child.deleteLater()
 
         self.photocards.clear()
+
+    def update_debug_button(self) -> None:
+        self.debug_detection_contour = self.window.ui.debug_checkBox.isChecked()
+
+    def update_mode(self) -> None:
+        if self.window.ui.mode_comboBox.currentText() == "Owned":
+            self.mode = PhotocardState.OWNED
+        if self.window.ui.mode_comboBox.currentText() == "Wanted":
+            self.mode = PhotocardState.WANTED
+        if self.window.ui.mode_comboBox.currentText() == "Favorite":
+            self.mode = PhotocardState.LIKED
+
+    def export_template(self) -> None:
+        path = QFileDialog.getSaveFileName(self.ui, "Save template location", "", "*.png")
+        if path:
+            pixmap = QPixmap(self.size)
+            self.render(pixmap)
+            pixmap.save(path)
+
+    # ----------------------------------------------------------------------------------------------
+    # UTILITIES
+    # ----------------------------------------------------------------------------------------------
 
     # https://stackoverflow.com/questions/33322488/how-to-change-image-illumination-in-opencv-python
     def adjust_gamma(self, image, gamma=1.0):
@@ -151,9 +162,6 @@ class Template(QWidget):
                           for i in np.arange(0, 256)]).astype("uint8")
 
         return cv2.LUT(image, table)
-
-    def update_debug_button(self) -> None:
-        self.debug_detection_contour = self.window.ui.debug_checkBox.isChecked()
 
     # https://stackoverflow.com/questions/44650888/resize-an-image-without-distortion-opencv
     def image_resize(self, image, width=None, height=None, inter=cv2.INTER_AREA):
