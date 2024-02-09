@@ -2,11 +2,13 @@ import cv2
 import os
 from pathlib import Path
 import numpy as np
+from PIL import Image
 
 from photocard import Photocard, PhotocardState
+from draw_utils import ellipse, draw_liked
 
 from PyQt6 import QtCore, QtGui
-from PyQt6.QtGui import QPixmap, QImageReader
+from PyQt6.QtGui import QPixmap, QImageReader, QImage
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -28,6 +30,10 @@ class Template(QWidget):
         self.ui = self.window.ui.img_widget
         self.debug_detection_contour: bool = False
         self.photocards: [Photocard] = []
+        self.liked: [Photocard] = []
+        self.owned: [Photocard] = []
+        self.wanted: [Photocard] = []
+
         self.mode: PhotocardState = PhotocardState.OWNED
         self.window.ui.mode_comboBox.setCurrentText("Owned")
 
@@ -144,11 +150,21 @@ class Template(QWidget):
             self.mode = PhotocardState.LIKED
 
     def export_template(self) -> None:
+
+
         path = QFileDialog.getSaveFileName(self.ui, "Save template location", "", "*.png")
         if path:
-            pixmap = QPixmap(self.size)
-            self.render(pixmap)
-            pixmap.save(path)
+            image = Image.open(self.path)
+            saving_path = str(path[0])
+
+            #  Process Liked
+            image = draw_liked(image, self.liked)
+            #  Process Owned
+            #  Process Wanted
+
+            #  Save template
+            image.save(saving_path, quality=95)
+
 
     # ----------------------------------------------------------------------------------------------
     # UTILITIES

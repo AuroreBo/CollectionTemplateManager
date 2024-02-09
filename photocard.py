@@ -88,11 +88,13 @@ class Photocard(QWidget):
 
     def setup_liked(self):
         if self.liked:
+            self.parent.liked.remove(self)
             # hide widget liked
             self.label_liked.hide()
 
             self.liked = False
         else:
+            self.parent.liked.append(self)
             # show widget liked
             self.label_liked.show()
 
@@ -100,21 +102,29 @@ class Photocard(QWidget):
 
     def setup_owned(self):
         if self.owned:
+            self.parent.owned.remove(self)
             # hide widget owned
             self.label_owned.hide()
 
             self.owned = False
         else:
+            self.parent.owned.append(self)
             # show widget owned
             self.label_owned.show()
+
             self.owned = True
 
     def setup_wanted(self):
         if self.wanted:
+
+            self.parent.wanted.remove(self)
             # hide widget wanted
             self.label_wanted.hide()
+
             self.wanted = False
         else:
+            self.parent.wanted.append(self)
             # show widget wanted
             self.label_wanted.show()
+
             self.wanted = True
