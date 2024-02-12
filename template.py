@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 
 from photocard import Photocard, PhotocardState
-from draw_utils import ellipse, draw_liked
+from draw_utils import draw_liked, draw_owned, draw_wanted
 
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtGui import QPixmap, QImageReader, QImage
@@ -150,17 +150,17 @@ class Template(QWidget):
             self.mode = PhotocardState.LIKED
 
     def export_template(self) -> None:
-
-
         path = QFileDialog.getSaveFileName(self.ui, "Save template location", "", "*.png")
         if path:
             image = Image.open(self.path)
             saving_path = str(path[0])
 
+            #  Process Owned
+            image = draw_owned(image, self.owned)
+             #  Process Wanted
+            image = draw_wanted(image, self.wanted)
             #  Process Liked
             image = draw_liked(image, self.liked)
-            #  Process Owned
-            #  Process Wanted
 
             #  Save template
             image.save(saving_path, quality=95)

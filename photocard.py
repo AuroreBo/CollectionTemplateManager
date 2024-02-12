@@ -2,13 +2,15 @@ from enum import Enum
 from pathlib import Path
 
 from PyQt6 import QtCore, QtGui
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QPainter
 from PyQt6.QtWidgets import (
     QWidget,
     QPushButton,
     QLabel,
 )
 from PyQt6.QtCore import Qt, QEvent
+
+from type_widget import WidgetOnLike, WidgetOnOwned, WidgetOnWanted
 
 class PhotocardState(Enum):
     """ Photocard State enumeration."""
@@ -31,7 +33,6 @@ class Photocard(QWidget):
         self.setParent(self.parent.ui)
 
         self.setGeometry(position[0], position[1], size[0], size[1])
-        # print(f"Widget created at {position} of size {size}")
 
         self.owned: bool = False
         self.liked: bool = False
@@ -39,28 +40,23 @@ class Photocard(QWidget):
 
         self.show()
 
-        # add child widgets
+        # --------- WIDGET FOR EACH MODE ----------
+        self.owned_widget = WidgetOnOwned(self)
+        self.owned_widget.hide()
+        self.owned_widget_hover = WidgetOnOwned(self)
+        self.owned_widget_hover.hide()
 
-        # --------- TEMPORARY WIDGET ----------
-        self.label: QLabel = QLabel(self)
-        self.label.setText("HOVER ON")
-        self.label.hide()
+        self.wanted_widget = WidgetOnWanted(self)
+        self.wanted_widget.hide()
+        self.wanted_widget_hover = WidgetOnWanted(self)
+        self.wanted_widget_hover.hide()
 
-        self.label_owned: QLabel = QLabel(self)
-        self.label_owned.setText("Owned")
-        self.label_owned.move(0, 10)
-        self.label_owned.hide()
+        self.like_widget = WidgetOnLike(self)
+        self.like_widget.hide()
+        self.like_widget_hover = WidgetOnLike(self)
+        self.like_widget_hover.hide()
 
-        self.label_liked: QLabel = QLabel(self)
-        self.label_liked.setText("liked")
-        self.label_liked.move(0, 20)
-        self.label_liked.hide()
-
-        self.label_wanted: QLabel = QLabel(self)
-        self.label_wanted.setText("Wanted")
-        self.label_wanted.move(0, 30)
-        self.label_wanted.hide()
-        # ------------------------------------
+        # ---------------------------------------
 
     def event(self, event):
         if event.type() == QEvent.Type.Enter:
@@ -70,9 +66,26 @@ class Photocard(QWidget):
         return super().event(event)
 
     def on_hover(self):
-        self.label.show()
+        match self.parent.mode:
+            case PhotocardState.OWNED:
+                self.owned_widget_hover.show()
+            case PhotocardState.WANTED:
+                self.wanted_widget_hover.show()
+            case PhotocardState.LIKED:
+                self.like_widget_hover.show()
+            case _:
+                self.owned_widget_hover.show()
+
     def out_hover(self):
-        self.label.hide()
+        match self.parent.mode:
+            case PhotocardState.OWNED:
+                self.owned_widget_hover.hide()
+            case PhotocardState.WANTED:
+                self.wanted_widget_hover.hide()
+            case PhotocardState.LIKED:
+                self.like_widget_hover.hide()
+            case _:
+                self.owned_widget_hover.hide()
 
     def mousePressEvent(self, event) -> None:
         if event.button() == Qt.MouseButton.LeftButton:
@@ -90,13 +103,13 @@ class Photocard(QWidget):
         if self.liked:
             self.parent.liked.remove(self)
             # hide widget liked
-            self.label_liked.hide()
+            self.like_widget.hide()
 
             self.liked = False
         else:
             self.parent.liked.append(self)
             # show widget liked
-            self.label_liked.show()
+            self.like_widget.show()
 
             self.liked = True
 
@@ -104,13 +117,13 @@ class Photocard(QWidget):
         if self.owned:
             self.parent.owned.remove(self)
             # hide widget owned
-            self.label_owned.hide()
+            self.owned_widget.hide()
 
             self.owned = False
         else:
             self.parent.owned.append(self)
             # show widget owned
-            self.label_owned.show()
+            self.owned_widget.show()
 
             self.owned = True
 
@@ -119,12 +132,12 @@ class Photocard(QWidget):
 
             self.parent.wanted.remove(self)
             # hide widget wanted
-            self.label_wanted.hide()
+            self.wanted_widget.hide()
 
             self.wanted = False
         else:
             self.parent.wanted.append(self)
             # show widget wanted
-            self.label_wanted.show()
+            self.wanted_widget.show()
 
             self.wanted = True

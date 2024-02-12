@@ -3,18 +3,37 @@ from PIL import Image, ImageDraw
 def draw_liked(image, liked: []):
     draw = ImageDraw.Draw(image)
     print(f"nb of pc liked : {len(liked)}")
-    for l in liked:
-        x = l.position[0] + 5
-        y = l.position[1] - 5
-        print(f"{x}, {y}")
-        draw.ellipse((x, y, x+15, y+15), fill="red")
+    for i in liked:
+        # print(f"x{i.position[0]}, y {i.position[1]}, w {i.size[0]} ,h {i.size[1]}")
+        x = i.position[0] + i.size[0] - 20
+        y = i.position[1] + i.size[1] - 20
+        # print(f"{x}, {y}")
+        draw.ellipse((x, y, x+15, y+15), fill="#EDA2C0")
 
     return image
-def ellipse(output_path):
-    image = Image.new("RGB", (400, 400), "white")
-    draw = ImageDraw.Draw(image)
-    draw.ellipse((25, 50, 175, 200), fill="red")
-    draw.ellipse((100, 150, 275, 300), outline="black", width=5,
-                 fill="yellow")
 
-    image.save(output_path)
+def draw_owned(image, owned: []):
+    draw = ImageDraw.Draw(image, "RGBA")
+    print(f"nb of pc owned : {len(owned)}")
+    for i in owned:
+        x = i.position[0] - 2
+        y = i.position[1] - 2
+        w = i.position[0] + i.size[0] + 2
+        h = i.position[1] + i.size[1] + 2
+        # print(f"x{x}, y{y}, w{w}, h{h}")
+        draw.rectangle((x, y, w, h), fill=(255, 255, 255, 204))
+
+    return image
+
+def draw_wanted(image, wanted: []):
+    draw = ImageDraw.Draw(image, "RGBA")
+    print(f"nb of pc wanted : {len(wanted)}")
+    for i in wanted:
+        x = i.position[0] - 2
+        y = i.position[1] - 2
+        w = i.position[0] + i.size[0] + 2
+        h = i.position[1] + i.size[1] + 2
+        # print(f"x{x}, y{y}, w{w}, h{h}")
+        draw.rectangle((x, y, w, h), fill=(0, 0, 0, 0), width=6, outline="#744FC6")
+
+    return image
