@@ -1,7 +1,8 @@
 from PIL import Image, ImageDraw
 
 def draw_liked(image, liked: []):
-    draw = ImageDraw.Draw(image)
+    image = image.convert("RGB")
+    draw = ImageDraw.Draw(image,"RGBA")
     print(f"nb of pc liked : {len(liked)}")
     for i in liked:
         # print(f"x{i.position[0]}, y {i.position[1]}, w {i.size[0]} ,h {i.size[1]}")
@@ -13,6 +14,7 @@ def draw_liked(image, liked: []):
     return image
 
 def draw_owned(image, owned: []):
+    image = image.convert("RGB")
     draw = ImageDraw.Draw(image, "RGBA")
     print(f"nb of pc owned : {len(owned)}")
     for i in owned:
@@ -26,6 +28,7 @@ def draw_owned(image, owned: []):
     return image
 
 def draw_wanted(image, wanted: []):
+    image = image.convert("RGB")
     draw = ImageDraw.Draw(image, "RGBA")
     print(f"nb of pc wanted : {len(wanted)}")
     for i in wanted:
