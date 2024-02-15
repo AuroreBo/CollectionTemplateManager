@@ -266,7 +266,7 @@ class Template(QWidget):
         return resized
 
     # https://www.geeksforgeeks.org/python-find-most-frequent-element-in-a-list/
-    def most_frequent(self,list):
+    def most_frequent(self,list) -> int:
         """ Find most frequent value of a list. """
         counter = 0
         num = list[0]
