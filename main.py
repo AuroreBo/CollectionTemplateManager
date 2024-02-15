@@ -27,6 +27,10 @@ def main() -> None:
     app = QApplication([])
     app_name = "Template Manager"
 
+    with open("style/Gravira.qss", "r") as f:
+        _style = f.read()
+        app.setStyleSheet(_style)
+
     window = TemplateManager(app_name)
 
     window.show()
