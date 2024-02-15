@@ -31,7 +31,8 @@ class TemplateManager(QMainWindow):
 
         self.ui.select_template_button.clicked.connect(self.select_template)
 
-    def select_template(self):
+    def select_template(self) -> None:
+        """ Select template to import. """
         if self.template:
             self.template.deleteLater()
 
@@ -55,7 +56,8 @@ class TemplateManager(QMainWindow):
             # self.ui.scrollArea.setWidgetResizable(True)
             # self.ui.scrollArea.resize(self.template.width, self.height())
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event) -> None:
+        """ Event when the window is resized. """
         QMainWindow.resizeEvent(self, event)
         self.ui.scrollArea.resize(self.width()-10, self.height())
 

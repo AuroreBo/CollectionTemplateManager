@@ -20,7 +20,7 @@ from PyQt6.QtWidgets import (
 )
 
 class Template(QWidget):
-    """ Template widget class"""
+    """ Template widget class. """
     def __init__(self, path: str, window: QMainWindow) -> None:
         super().__init__()  # Call the inherited classes __init__ method
 
@@ -59,7 +59,9 @@ class Template(QWidget):
 
         self.detect_pc()
 
-    def save_resized_image(self):
+    # to update with user choosing max size
+    def save_resized_image(self) -> None:
+        """ Save the current image with new size and set as bg widget. """
         folder_path = Path(self.path).parent.absolute()
         name = Path(self.path).stem
 
@@ -85,6 +87,7 @@ class Template(QWidget):
 
     # https://dontrepeatyourself.org/post/edge-and-contour-detection-with-opencv-and-python/
     def detect_pc(self) -> None:
+        """ Detect every rect of template and add widget to each one. """
         self.clear_pc_widget()
         print(f"current path {self.path}")
         img = cv2.imread(self.path)
@@ -156,6 +159,7 @@ class Template(QWidget):
             cv2.imshow('pc', image_pc)
 
     def get_average_size(self, properties:[tuple]) -> None:
+        """ Get average size (w,h) of pc properties list. """
         temp_w = 0
         temp_h = 0
         for prop in properties:
@@ -169,22 +173,27 @@ class Template(QWidget):
         # print(self.average_pc_size)
 
     def add_pc_widget(self, position: tuple, size: tuple) -> None:
+        """ Instantiate Photocard and add it to our pc list. """
         pc = Photocard(position, size, self)
         self.photocards.append(pc)
 
     def clear_pc_widget(self) -> None:
+        """ Clear UI and pc list. """
         for child in self.ui.children():
             child.deleteLater()
 
         self.photocards.clear()
 
     def update_debug_button(self) -> None:
+        """ Update debug_detection_contour state. """
         self.debug_detection_contour = self.window.ui.debug_checkBox.isChecked()
 
     def update_cardtype_button(self) -> None:
+        """ Update bright_card state. """
         self.bright_card = self.window.ui.cardtype_checkBox.isChecked()
 
     def update_mode(self) -> None:
+        """ Update bright_card state. """
         if self.window.ui.mode_comboBox.currentText() == "Owned":
             self.mode = PhotocardState.OWNED
         if self.window.ui.mode_comboBox.currentText() == "Wanted":
@@ -193,6 +202,7 @@ class Template(QWidget):
             self.mode = PhotocardState.LIKED
 
     def export_template(self) -> None:
+        """ Export template as png at choosen path with file dialog. """
         path = QFileDialog.getSaveFileName(self.ui, "Save template location", "", "*.png")
         if path:
             image = Image.open(self.path)
@@ -215,7 +225,7 @@ class Template(QWidget):
 
     # https://stackoverflow.com/questions/33322488/how-to-change-image-illumination-in-opencv-python
     def adjust_gamma(self, image, gamma=1.0):
-
+        """ Adjust gamma of an image. """
         invGamma = 1.0 / gamma
         table = np.array([((i / 255.0) ** invGamma) * 255
                           for i in np.arange(0, 256)]).astype("uint8")
@@ -224,6 +234,7 @@ class Template(QWidget):
 
     # https://stackoverflow.com/questions/44650888/resize-an-image-without-distortion-opencv
     def image_resize(self, image, width=None, height=None, inter=cv2.INTER_AREA):
+        """ Resize image. """
         # initialize the dimensions of the image to be resized and
         # grab the image size
         dim = None
@@ -256,6 +267,7 @@ class Template(QWidget):
 
     # https://www.geeksforgeeks.org/python-find-most-frequent-element-in-a-list/
     def most_frequent(self,list):
+        """ Find most frequent value of a list. """
         counter = 0
         num = list[0]
         for i in list:

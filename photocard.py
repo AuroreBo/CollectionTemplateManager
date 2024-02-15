@@ -59,13 +59,15 @@ class Photocard(QWidget):
         # ---------------------------------------
 
     def event(self, event):
+        """ Manage event. """
         if event.type() == QEvent.Type.Enter:
             self.on_hover()
         elif event.type() == QEvent.Type.Leave:
             self.out_hover()
         return super().event(event)
 
-    def on_hover(self):
+    def on_hover(self) -> None:
+        """ Event on hover. """
         match self.parent.mode:
             case PhotocardState.OWNED:
                 self.owned_widget_hover.show()
@@ -76,7 +78,8 @@ class Photocard(QWidget):
             case _:
                 self.owned_widget_hover.show()
 
-    def out_hover(self):
+    def out_hover(self) -> None:
+        """ Event out hover. """
         match self.parent.mode:
             case PhotocardState.OWNED:
                 self.owned_widget_hover.hide()
@@ -88,6 +91,7 @@ class Photocard(QWidget):
                 self.owned_widget_hover.hide()
 
     def mousePressEvent(self, event) -> None:
+        """ Event on mouse pressed. """
         if event.button() == Qt.MouseButton.LeftButton:
             match self.parent.mode:
                 case PhotocardState.OWNED:
@@ -99,7 +103,8 @@ class Photocard(QWidget):
                 case _:
                     self.setup_owned()
 
-    def setup_liked(self):
+    def setup_liked(self) -> None:
+        """ Add/Delete liked UI. """
         if self.liked:
             self.parent.liked.remove(self)
             # hide widget liked
@@ -113,7 +118,8 @@ class Photocard(QWidget):
 
             self.liked = True
 
-    def setup_owned(self):
+    def setup_owned(self) -> None:
+        """ Add/Delete owned UI. """
         if self.owned:
             self.parent.owned.remove(self)
             # hide widget owned
@@ -127,9 +133,9 @@ class Photocard(QWidget):
 
             self.owned = True
 
-    def setup_wanted(self):
+    def setup_wanted(self) -> None:
+        """ Add/Delete wanted UI. """
         if self.wanted:
-
             self.parent.wanted.remove(self)
             # hide widget wanted
             self.wanted_widget.hide()

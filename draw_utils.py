@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw
 
 def draw_liked(image, liked: []):
+    """ Draw ellispe at every liked pc position. """
     image = image.convert("RGB")
     draw = ImageDraw.Draw(image,"RGBA")
     print(f"nb of pc liked : {len(liked)}")
@@ -14,6 +15,7 @@ def draw_liked(image, liked: []):
     return image
 
 def draw_owned(image, owned: []):
+    """ Draw faded rectangle at every owned pc position. """
     image = image.convert("RGB")
     draw = ImageDraw.Draw(image, "RGBA")
     print(f"nb of pc owned : {len(owned)}")
@@ -28,6 +30,7 @@ def draw_owned(image, owned: []):
     return image
 
 def draw_wanted(image, wanted: []):
+    """ Draw rectangle border at every wanted pc position. """
     image = image.convert("RGB")
     draw = ImageDraw.Draw(image, "RGBA")
     print(f"nb of pc wanted : {len(wanted)}")
