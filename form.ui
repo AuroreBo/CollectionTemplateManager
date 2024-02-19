@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>815</width>
+    <width>594</width>
     <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Template Manager</string>
   </property>
   <widget class="QScrollArea" name="scrollArea">
    <property name="geometry">
@@ -72,6 +72,45 @@
           </widget>
          </item>
          <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="max_width_label">
+           <property name="text">
+            <string>Max Width</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="max_width_lineEdit">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>35</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>1150</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="resize_button">
            <property name="text">
             <string>Resize and save</string>
@@ -85,27 +124,14 @@
          <item>
           <widget class="QPushButton" name="detect_button">
            <property name="text">
-            <string>Detect</string>
+            <string>Detection</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="debug_checkBox">
+          <widget class="QPushButton" name="open_settings_button">
            <property name="text">
-            <string>Display_debug</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="cardtype_checkBox">
-           <property name="text">
-            <string>Bright Card ?</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-           <property name="tristate">
-            <bool>false</bool>
+            <string>Settings</string>
            </property>
           </widget>
          </item>

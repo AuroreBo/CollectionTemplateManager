@@ -6,6 +6,7 @@ from PIL import Image
 
 from photocard import Photocard, PhotocardState
 from draw_utils import draw_liked, draw_owned, draw_wanted
+from detection_settings import DetectionSettings
 
 from PyQt6 import QtCore, QtGui
 from PyQt6.QtGui import QPixmap, QImageReader, QImage
@@ -21,7 +22,7 @@ from PyQt6.QtWidgets import (
 
 class Template(QWidget):
     """ Template widget class. """
-    def __init__(self, path: str, window: QMainWindow) -> None:
+    def __init__(self, path: str, window: QMainWindow, detection_settings: DetectionSettings) -> None:
         super().__init__()  # Call the inherited classes __init__ method
 
         self.path = path
@@ -29,7 +30,7 @@ class Template(QWidget):
         self.window = window
         self.ui = self.window.ui.img_widget
         self.debug_detection_contour: bool = False
-        self.bright_card: bool = True
+        self.detection_settings = detection_settings
         self.photocards: [Photocard] = []
         self.liked: [Photocard] = []
         self.owned: [Photocard] = []
@@ -39,12 +40,9 @@ class Template(QWidget):
         self.mode: PhotocardState = PhotocardState.OWNED
         self.window.ui.mode_comboBox.setCurrentText("Owned")
 
-        self.window.ui.debug_checkBox.stateChanged.connect(self.update_debug_button)
         self.window.ui.resize_button.clicked.connect(self.save_resized_image)
-        self.window.ui.detect_button.clicked.connect(self.detect_pc)
+        self.window.ui.detect_button.clicked.connect(self.launch_detection)
         self.window.ui.export_button.clicked.connect(self.export_template)
-        self.window.ui.debug_checkBox.stateChanged.connect(self.update_debug_button)
-        self.window.ui.cardtype_checkBox.stateChanged.connect(self.update_cardtype_button)
         self.window.ui.mode_comboBox.currentTextChanged.connect(self.update_mode)
 
         self.img = cv2.imread(self.path)
@@ -57,7 +55,7 @@ class Template(QWidget):
 
         self.ui.setStyleSheet("QWidget#img_widget{background-image: url(" + self.path + "); border:0px}")
 
-        self.detect_pc()
+        self.detect()
 
     # to update with user choosing max size
     def save_resized_image(self) -> None:
@@ -65,7 +63,11 @@ class Template(QWidget):
         folder_path = Path(self.path).parent.absolute()
         name = Path(self.path).stem
 
-        self.img = self.image_resize(self.img, width=1150)
+        width = 1150
+        if self.window.ui.max_width_lineEdit.text():
+            width = int(self.window.ui.max_width_lineEdit.text())
+
+        self.img = self.image_resize(self.img, width=width)
         self.height, self.width, _ = self.img.shape
         self.ui.resize(self.height, self.width)
         self.ui.setMinimumSize(self.width - 20, self.height)
@@ -85,8 +87,13 @@ class Template(QWidget):
             if write_status:
                 self.ui.setStyleSheet("QWidget#img_widget{background-image: url(" + self.path + "); border:0px}")
 
+    def launch_detection(self):
+        """ Launch detection without debug mode on. """
+        self.debug_detection_contour = False
+        self.detect()
+
     # https://dontrepeatyourself.org/post/edge-and-contour-detection-with-opencv-and-python/
-    def detect_pc(self) -> None:
+    def detect(self) -> None:
         """ Detect every rect of template and add widget to each one. """
         self.clear_pc_widget()
         print(f"current path {self.path}")
@@ -98,7 +105,7 @@ class Template(QWidget):
         brightness = -1.0
 
         # find better way
-        if self.bright_card:
+        if self.detection_settings.card_type:
             adjusted = self.adjust_gamma(gray, gamma=gamma)
         else:
             adjusted = cv2.addWeighted(gray, contrast, gray, gamma, brightness)
@@ -116,13 +123,13 @@ class Template(QWidget):
 
         # WIP TO CLEAN AND OPTIMIZE THIS SECTION
         contours_properties: [tuple] = []
-        margin = 35
+        margin = self.detection_settings.margin
 
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
             # delete small rectangle detected
-            if w > 20:
-                if h > 20:
+            if w > self.detection_settings.minimum_noise:
+                if h > self.detection_settings.minimum_noise:
                     contours_properties.append((x,y,w,h))
 
         self.get_average_size(contours_properties)
@@ -145,7 +152,6 @@ class Template(QWidget):
                 cv2.putText(image_pc, str(h), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 255), 2)
 
         if self.debug_detection_contour:
-            image_contours = img.copy()
             # draw the contours on a copy of the original image
             cv2.drawContours(image_copy, contours, -1, (0, 255, 0), 2)
             print(len(contours), "objects were found in this image.")
@@ -183,14 +189,6 @@ class Template(QWidget):
             child.deleteLater()
 
         self.photocards.clear()
-
-    def update_debug_button(self) -> None:
-        """ Update debug_detection_contour state. """
-        self.debug_detection_contour = self.window.ui.debug_checkBox.isChecked()
-
-    def update_cardtype_button(self) -> None:
-        """ Update bright_card state. """
-        self.bright_card = self.window.ui.cardtype_checkBox.isChecked()
 
     def update_mode(self) -> None:
         """ Update bright_card state. """
